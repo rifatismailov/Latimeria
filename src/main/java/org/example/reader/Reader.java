@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -62,9 +63,11 @@ public class Reader implements Runnable {
         File file = new File(filePath);
 
         if (FileManager.isFileValid(file)) {
-            String text = new DocumentReader(filePath).reader().toString();
+            DocumentReader documentReader = new DocumentReader(filePath);
+            String text = documentReader.reader().toString();
+            Map<String, Object> metadata = documentReader.getMetadataMap();
             String status = mainClassifier.classifyTexts(text).replaceAll(",", "");
-            processClassificationResult(status, text);
+            processClassificationResult(status, text,metadata);
             FileManager.deleteFile(file);  // Видаляємо файл після обробки
         } else {
             LOGGER.severe("Файл не знайдено або порожній: " + filePath);
@@ -80,11 +83,11 @@ public class Reader implements Runnable {
      * @param text   текст, що був класифікований.
      * @throws IOException у разі проблем із видаленням файлу з Minio.
      */
-    private void processClassificationResult(@NotNull String status, String text) throws IOException {
+    private void processClassificationResult(@NotNull String status, String text,Map<String, Object> metadata) throws IOException {
         if (status.contains("positive")) {
             String tip = tipClassifier.classifyTexts(text).toString().replaceAll(",", "");
-            LOGGER.info("ПОЗИТИВНИЙ " + new Result(hostInfo, status, tip));
-            elasticSender.sendData("latimeria", UUID.randomUUID().toString(), new Result(hostInfo, status, tip));
+            LOGGER.info("ПОЗИТИВНИЙ " + new Result(hostInfo, status, tip, metadata));
+            elasticSender.sendData("latimeria", UUID.randomUUID().toString(), new Result(hostInfo, status, tip,metadata));
 
         } else {
             LOGGER.info("НЕГАТИВНИЙ " + filePath + " " + status);

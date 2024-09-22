@@ -16,18 +16,21 @@ public class Result {
 
     // Тип результату (наприклад, повідомлення або рапорт те що... ).
     private String tip;
+    Map<String, Object> metadata;
 
     /**
      * Конструктор для ініціалізації об'єкта Result.
      *
      * @param hostInfo інформація про хост (ім'я хоста, IP-адреса, MAC-адреса тощо).
-     * @param status статус результату (наприклад, positive або negative).
-     * @param tip тип результату (повідомлення, схема тощо).
+     * @param status   статус результату (наприклад, positive або negative).
+     * @param tip      тип результату (повідомлення, схема тощо).
+     * @param metadata методінні фалів яки були ідентіфіковані
      */
-    public Result(HostInfo hostInfo, String status, String tip) {
+    public Result(HostInfo hostInfo, String status, String tip, Map<String, Object> metadata) {
         this.hostInfo = hostInfo;
         this.status = status;
         this.tip = tip;
+        this.metadata = metadata;
     }
 
     /**
@@ -51,7 +54,7 @@ public class Result {
 
         // Додаємо інформацію про хост до основної мапи.
         map.put("hostInfo", hostInfoMap);
-
+        map.put("metadata", metadata);
         // Додаємо статус та тип результату до мапи.
         map.put("status", status);
         map.put("tip", tip);
@@ -85,5 +88,9 @@ public class Result {
      */
     public String getTip() {
         return tip;
+    }
+
+    public Map<String, Object> getMetadata() {
+        return metadata;
     }
 }
