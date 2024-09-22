@@ -1,12 +1,16 @@
 package org.example.configuration;
 
 import io.minio.MinioClient;
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.example.manager.MinioManager;
 import org.example.nlp.ClassifierModel;
+import org.example.manager.ELCSender;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.File;
 import java.io.IOException;
 
 @Configuration
@@ -26,6 +30,18 @@ public class AppConfig {
         minioManager.checkCreateBucket();
         minioManager.checkSaveDir(SAVE_DIR);
         return minioManager;
+    }
+
+
+    public RestHighLevelClient client() {
+        RestClientBuilder builder = RestClient.builder(
+                new HttpHost("192.168.51.131", 9200, "http"));
+        return new RestHighLevelClient(builder);
+    }
+
+    @Bean
+    public ELCSender sender() {
+        return new ELCSender(client());
     }
 }
 

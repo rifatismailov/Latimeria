@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+
 import java.util.logging.Logger;
 
 /**
@@ -98,4 +99,6 @@ public class HTTPManager {
         // Повернення шляху до збереженого файлу
         return DIR + fileName;
     }
+
+
 }
