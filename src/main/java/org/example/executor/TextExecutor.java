@@ -1,5 +1,7 @@
 package org.example.executor;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -11,6 +13,7 @@ public class TextExecutor {
      * @Math.min(): Ця функція повертає менше з двох значень: кількість текстів або кількість доступних процесорів.
      * Це гарантує, що не буде створено більше потоків, ніж потрібно або доступно для обробки текстів.
      **/
+    @NotNull
     public static ExecutorService executor(String[] texts) {
         int threadCount = Math.min(texts.length, Runtime.getRuntime().availableProcessors());
         return Executors.newFixedThreadPool(threadCount);

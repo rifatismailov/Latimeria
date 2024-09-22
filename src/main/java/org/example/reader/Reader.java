@@ -7,6 +7,7 @@ import org.example.nlp.TextClassifier;
 import org.example.manager.ElasticSender;
 import org.example.web.HostInfo;
 import org.example.web.Result;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,31 +33,30 @@ public class Reader implements Runnable {
     /**
      * Конструктор класу Reader.
      *
-     * @param minioManager   клієнт Minio для роботи з хмарним сховищем.
-     * @param objectName    назва об'єкта (файлу) в бакеті Minio.
-     * @param hostInfo      інформація про хост.
-     * @param filePath      шлях до локального файлу для читання.
-     * @throws IOException              у разі проблем з файлом або мережею.
-     * @throws ClassNotFoundException   у разі проблем із завантаженням класифікаторів.
+     * @param minioManager клієнт Minio для роботи з хмарним сховищем.
+     * @param objectName   назва об'єкта (файлу) в бакеті Minio.
+     * @param hostInfo     інформація про хост.
+     * @param filePath     шлях до локального файлу для читання.
+     * @throws IOException            у разі проблем з файлом або мережею.
+     * @throws ClassNotFoundException у разі проблем із завантаженням класифікаторів.
      */
-    public Reader(ClassifierModel classifierModel, MinioManager minioManager, String objectName, HostInfo hostInfo, String filePath, ElasticSender elasticSender) throws IOException, ClassNotFoundException {
+    public Reader(@NotNull ClassifierModel classifierModel, MinioManager minioManager, String objectName, HostInfo hostInfo, String filePath, ElasticSender elasticSender) throws IOException, ClassNotFoundException {
         this.minioManager = minioManager;
         this.objectName = objectName;
         this.hostInfo = hostInfo;
         this.filePath = filePath;
         // Завантажуємо моделі для класифікації
-        this.mainClassifier=classifierModel.getMainClassifier();
-        this.tipClassifier=classifierModel.getTipClassifier();
+        this.mainClassifier = classifierModel.getMainClassifier();
+        this.tipClassifier = classifierModel.getTipClassifier();
         this.elasticSender = elasticSender; // Інжектуємо Sender
-
     }
 
     /**
      * Метод для читання та обробки файлу.
      * Він перевіряє, чи є файл дійсним, потім читає його та класифікує текст.
      *
-     * @throws IOException              у разі проблем із читанням файлу.
-     * @throws ClassNotFoundException   у разі проблем із завантаженням моделі класифікатора.
+     * @throws IOException            у разі проблем із читанням файлу.
+     * @throws ClassNotFoundException у разі проблем із завантаженням моделі класифікатора.
      */
     private void readFile() throws IOException, ClassNotFoundException {
         File file = new File(filePath);
@@ -76,16 +76,15 @@ public class Reader implements Runnable {
      * Якщо результат класифікації є "позитивним", додається класифікація від додаткового класифікатора.
      * Якщо результат "негативний", файл видаляється з Minio.
      *
-     * @param status  результат класифікації (статус).
-     * @param text    текст, що був класифікований.
+     * @param status результат класифікації (статус).
+     * @param text   текст, що був класифікований.
      * @throws IOException у разі проблем із видаленням файлу з Minio.
      */
-    private void processClassificationResult(String status, String text) throws IOException {
+    private void processClassificationResult(@NotNull String status, String text) throws IOException {
         if (status.contains("positive")) {
             String tip = tipClassifier.classifyTexts(text).toString().replaceAll(",", "");
             LOGGER.info("ПОЗИТИВНИЙ " + new Result(hostInfo, status, tip));
-            //new HTTPManager().sendLog();
-             elasticSender.sendData("latimeria", UUID.randomUUID().toString(), new Result(hostInfo, status, tip));
+            elasticSender.sendData("latimeria", UUID.randomUUID().toString(), new Result(hostInfo, status, tip));
 
         } else {
             LOGGER.info("НЕГАТИВНИЙ " + filePath + " " + status);

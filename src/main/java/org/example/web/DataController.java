@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 
+/**
+ * Контролер для обробки HTTP-запитів на отримання даних.
+ */
 @RestController
 @RequestMapping("/api")
 public class DataController {
@@ -21,22 +24,35 @@ public class DataController {
     private final MinioManager minioManager;
     private final ElasticSender elasticSender; // Додаємо Sender
 
-    // Інжектимо бін ClassifierModel через конструктор
+    /**
+     * Конструктор контролера для інжекції залежностей.
+     *
+     * @param classifierModel модель класифікації.
+     * @param minioManager менеджер для роботи з MinIO.
+     * @param elasticSender менеджер для відправки даних в Elasticsearch.
+     */
     @Autowired
     public DataController(ClassifierModel classifierModel, MinioManager minioManager, ElasticSender elasticSender) {
         this.classifierModel = classifierModel;
         this.minioManager = minioManager;
         this.elasticSender = elasticSender; // Інжектуємо Sender
-
     }
 
+    /**
+     * Метод для отримання даних від клієнта.
+     *
+     * @param hostInfo об'єкт, що містить інформацію про хост.
+     * @return ResponseEntity з повідомленням про успішне отримання даних.
+     * @throws IOException у разі проблем з введенням/виведенням.
+     * @throws InterruptedException у разі переривання потоку.
+     * @throws ClassNotFoundException у разі проблем із завантаженням класів.
+     */
     @PostMapping("/HostInfo")
     public ResponseEntity<String> receiveData(@RequestBody HostInfo hostInfo) throws IOException, InterruptedException, ClassNotFoundException {
-
-        // Отримання  URL
+        // Отримання URL для завантаження файлу
         String resignedUrl = minioManager.getPresignedUrl(hostInfo.getUrlFile());
         if (resignedUrl != null) {
-            // Завантажуємо файл
+            // Завантажуємо файл за отриманим URL
             String file = minioManager.downloadFile(resignedUrl);
             // Якщо файл існує і не порожній, починаємо обробку
             Reader reader = new Reader(classifierModel, minioManager, hostInfo.getUrlFile(), hostInfo, file, elasticSender);
@@ -45,4 +61,3 @@ public class DataController {
         return new ResponseEntity<>("Дані успішно отримано!", HttpStatus.OK);
     }
 }
-
