@@ -59,6 +59,7 @@
         <version>7.17.24</version> <!-- Версію можна змінювати залежно від вашого Elasticsearch -->
     </dependency>
 
+
         <!-- HTTP Core -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>

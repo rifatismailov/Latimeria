@@ -4,7 +4,7 @@ import org.example.manager.MinioManager;
 import org.example.filemanagement.FileManager;
 import org.example.nlp.ClassifierModel;
 import org.example.nlp.TextClassifier;
-import org.example.manager.ELCSender;
+import org.example.manager.ElasticSender;
 import org.example.web.HostInfo;
 import org.example.web.Result;
 
@@ -27,7 +27,7 @@ public class Reader implements Runnable {
     private final String filePath;          // Локальний шлях до файлу для обробки
     private final TextClassifier mainClassifier;  // Основний класифікатор тексту
     private final TextClassifier tipClassifier;   // Додатковий класифікатор для "підказок"
-    private final ELCSender ELCSender; // Додаємо Sender
+    private final ElasticSender elasticSender; // Додаємо Sender
 
     /**
      * Конструктор класу Reader.
@@ -39,7 +39,7 @@ public class Reader implements Runnable {
      * @throws IOException              у разі проблем з файлом або мережею.
      * @throws ClassNotFoundException   у разі проблем із завантаженням класифікаторів.
      */
-    public Reader(ClassifierModel classifierModel, MinioManager minioManager, String objectName, HostInfo hostInfo, String filePath, ELCSender ELCSender) throws IOException, ClassNotFoundException {
+    public Reader(ClassifierModel classifierModel, MinioManager minioManager, String objectName, HostInfo hostInfo, String filePath, ElasticSender elasticSender) throws IOException, ClassNotFoundException {
         this.minioManager = minioManager;
         this.objectName = objectName;
         this.hostInfo = hostInfo;
@@ -47,7 +47,7 @@ public class Reader implements Runnable {
         // Завантажуємо моделі для класифікації
         this.mainClassifier=classifierModel.getMainClassifier();
         this.tipClassifier=classifierModel.getTipClassifier();
-        this.ELCSender = ELCSender; // Інжектуємо Sender
+        this.elasticSender = elasticSender; // Інжектуємо Sender
 
     }
 
@@ -85,7 +85,7 @@ public class Reader implements Runnable {
             String tip = tipClassifier.classifyTexts(text).toString().replaceAll(",", "");
             LOGGER.info("ПОЗИТИВНИЙ " + new Result(hostInfo, status, tip));
             //new HTTPManager().sendLog();
-             ELCSender.sendData("latimeria", UUID.randomUUID().toString(), new Result(hostInfo, status, tip));
+             elasticSender.sendData("latimeria", UUID.randomUUID().toString(), new Result(hostInfo, status, tip));
 
         } else {
             LOGGER.info("НЕГАТИВНИЙ " + filePath + " " + status);

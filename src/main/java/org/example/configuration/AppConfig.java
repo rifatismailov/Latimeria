@@ -7,7 +7,7 @@ import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.example.manager.MinioManager;
 import org.example.nlp.ClassifierModel;
-import org.example.manager.ELCSender;
+import org.example.manager.ElasticSender;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -40,8 +40,8 @@ public class AppConfig {
     }
 
     @Bean
-    public ELCSender sender() {
-        return new ELCSender(client());
+    public ElasticSender elasticSender() {
+        return new ElasticSender(client());
     }
 }
 
