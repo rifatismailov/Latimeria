@@ -35,11 +35,11 @@ public class TextClassifier {
             Classification classification = classifier.classify(text);
             return classification.getLabeling().getBestLabel().toString();
         } catch (StringIndexOutOfBoundsException e) {
-            LOGGER.log(Level.WARNING, "String index out of bounds: {0}", e.getMessage());
-            return "String index error";
+            LOGGER.log(Level.WARNING, "Индекс строки выходит за пределы: {0}", e.getMessage());
+            return "Ошибка индекса строки";
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error classifying text: {0}", e.getMessage());
-            return "Classification error";
+            LOGGER.log(Level.WARNING, "Ошибка классификации текста: {0}", e.getMessage());
+            return "Ошибка классификации";
         }
     }
 
@@ -56,14 +56,14 @@ public class TextClassifier {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
             classifier = (Classifier) ois.readObject();
             // Логування успішного завантаження моделі
-            LOGGER.info("Model loaded successfully from: " + file);
+            LOGGER.info("Модель успешно загружена из: " + file);
         } catch (FileNotFoundException e) {
             // Логування та виняток у випадку, якщо файл не знайдено
-            LOGGER.severe("Model file not found: " + file);
+            LOGGER.severe("Файл модели не найден: " + file);
             throw e;
         } catch (IOException | ClassNotFoundException e) {
             // Логування інших помилок при завантаженні
-            LOGGER.severe("Error loading model: " + e.getMessage());
+            LOGGER.severe("Ошибка загрузки модели: " + e.getMessage());
             throw e;
         }
     }
@@ -80,8 +80,8 @@ public class TextClassifier {
         try {
             predictedCategory = classifyText(text);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Error classifying text: {0}", e.getMessage());
-            predictedCategory = "Error classifying text";
+            LOGGER.log(Level.WARNING, "Ошибка классификации текста: {0}", e.getMessage());
+            predictedCategory = "Ошибка классификации текста";
         }
         return "[" + predictedCategory + "]";
     }
@@ -114,8 +114,8 @@ public class TextClassifier {
                 try {
                     results.add(future.get());
                 } catch (Exception e) {
-                    LOGGER.log(Level.WARNING, "Error getting classification result: {0}", e.getMessage());
-                    results.add("Classification error");
+                    LOGGER.log(Level.WARNING, "Ошибка получения результата классификации: {0}", e.getMessage());
+                    results.add("Ошибка классификации");
                 }
             }
         } finally {

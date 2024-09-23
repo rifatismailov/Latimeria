@@ -6,11 +6,11 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Клас ElasticSender відповідає за відправку даних до Elasticsearch.
@@ -50,12 +50,25 @@ public class ElasticSender {
                     .source(jsonMap);  // Передаємо готовий Map замість об'єкта
 
             // Виконуємо запит до Elasticsearch і отримуємо відповідь.
-            IndexResponse response = client.index(request, RequestOptions.DEFAULT);
-            LOGGER.info("Дані відправлено: " + response.getId());
-            LOGGER.info("Response: " + response.toString());
+            client.index(request, RequestOptions.DEFAULT);
+
         } catch (IOException e) {
-            // Логування помилки, якщо відправка не вдалася.
-            LOGGER.severe("Помилка при відправці даних: " + e.getMessage());
+            LOGGER.severe("Інший тип помилки :" + e.getMessage());
+            String regex = "requestLine=(.*?), host=(.*?), response=(.*?)}";
+            Pattern pattern = Pattern.compile(regex);
+            Matcher matcher = pattern.matcher(e.getMessage());
+
+            if (matcher.find()) {
+                String requestLine = matcher.group(1);
+                String host = matcher.group(2);
+                String response = matcher.group(3);
+
+                LOGGER.info("Запрос строки: " + requestLine);
+                LOGGER.info("Host: " + host);
+                LOGGER.info("Відповідь: " + response);
+            } else {
+                LOGGER.severe("Не вдалося розпарсити деталі з повідомлення: " + e.getMessage());
+            }
         }
     }
 }

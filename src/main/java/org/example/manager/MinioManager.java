@@ -106,20 +106,29 @@ public record MinioManager(MinioClient minioClient, String bucketName) {
         }
     }
 
-    // Метод для видалення файлу
-    public void deleteFile(String objectName) {
+    /**
+     * Метод для видалення файлу з MinIO сервер.
+     *
+     * @param fileName Ім'я файлу, яке буде видалений з MinIO.
+     */
+    public void deleteFile(String fileName) {
         try {
-            minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).object(objectName).build());
-            LOGGER.info("Файл " + objectName + " успішно видалений.");
+            minioClient.removeObject(RemoveObjectArgs.builder().bucket(bucketName).object(fileName).build());
+            LOGGER.info("Файл " + fileName + " успішно видалений.");
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
             LOGGER.severe("Помилка під час видалення об'єкта: " + e.getMessage());
         }
     }
 
     // Метод для завантаження файлу за URL
-    public String downloadFile(String file) {
+    /**
+     * Метод для завантаження файлу за URL.
+     *
+     * @param fileURL – URL-адреса файлу для завантаження.
+     */
+    public String downloadFile(String fileURL) {
         // Повертаємо шлях до файлу після успішного завантаження
-        return new HTTPManager().download(file, SAVE_DIR);
+        return new HTTPManager().download(fileURL, SAVE_DIR);
     }
 
 }
