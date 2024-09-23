@@ -86,11 +86,10 @@ public class Reader implements Runnable {
     private void processClassificationResult(@NotNull String status, String text,Map<String, Object> metadata) throws IOException {
         if (status.contains("positive")) {
             String tip = tipClassifier.classifyTexts(text).toString().replaceAll(",", "");
-            LOGGER.info("ПОЗИТИВНИЙ " + new Result(hostInfo, status, tip, metadata));
+            LOGGER.info("ПОЗИТИВНИЙ " +hostInfo.toString());
             elasticSender.sendData("latimeria", UUID.randomUUID().toString(), new Result(hostInfo, status, tip,metadata));
-
         } else {
-            LOGGER.info("НЕГАТИВНИЙ " + filePath + " " + status);
+            LOGGER.info("НЕГАТИВНИЙ " + hostInfo.toString());
             minioManager.deleteFile(objectName);  // Видаляємо файл із Minio
         }
     }

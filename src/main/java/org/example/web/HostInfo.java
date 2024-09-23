@@ -1,5 +1,8 @@
 package org.example.web;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Клас для зберігання інформації про хост, його адресу, MAC-адресу та віддалену адресу.
  */
@@ -137,13 +140,14 @@ public class HostInfo {
 
     @Override
     public String toString() {
-        return "HostInfo{" +
-                "hostName='" + hostName + '\'' +
-                ", hostAddress='" + hostAddress + '\'' +
-                ", macAddress='" + macAddress + '\'' +
-                ", remoteAddr='" + remoteAddr + '\'' +
-                ", urlFile='" + urlFile + '\'' +
-                '}';
+        // Створюємо мапу для зберігання інформації про хост.
+        Map<String, Object> hostInfoMap = new HashMap<>();
+        hostInfoMap.put("hostName", getHostName());
+        hostInfoMap.put("hostAddress", getHostAddress());
+        hostInfoMap.put("macAddress", getMacAddress());
+        hostInfoMap.put("remoteAddr", getRemoteAddr());
+        hostInfoMap.put("urlFile", getUrlFile());
+        return hostInfoMap.toString();
     }
 
 }
