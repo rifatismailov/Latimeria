@@ -1,6 +1,10 @@
 package org.example.web;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,7 +20,8 @@ public class Result {
 
     // Тип результату (наприклад, повідомлення або рапорт те що... ).
     private String tip;
-    Map<String, Object> metadata;
+    private Map<String, Object> metadata;
+    private Map<String, Object> addInfo;
 
     /**
      * Конструктор для ініціалізації об'єкта Result.
@@ -26,11 +31,12 @@ public class Result {
      * @param tip      тип результату (повідомлення, схема тощо).
      * @param metadata методінні фалів яки були ідентіфіковані
      */
-    public Result(HostInfo hostInfo, String status, String tip, Map<String, Object> metadata) {
+    public Result(HostInfo hostInfo, String status, String tip, Map<String, Object> metadata,Map<String, Object> addInfo) {
         this.hostInfo = hostInfo;
         this.status = status;
         this.tip = tip;
         this.metadata = metadata;
+        this.addInfo = addInfo;
     }
 
     /**
@@ -39,7 +45,7 @@ public class Result {
      *
      * @return карта, що містить ключі та значення для полів hostInfo, status і tip.
      */
-    public Map<String, Object> toMap() {
+    public Map<String, Object> toMap() throws JsonProcessingException {
 
         // Створюємо мапу для зберігання інформації про Result.
         Map<String, Object> map = new HashMap<>();
@@ -53,12 +59,12 @@ public class Result {
         hostInfoMap.put("urlFile", hostInfo.getUrlFile());
 
         // Додаємо інформацію про хост до основної мапи.
+        hostInfoMap.put("addInfo", addInfo);
         map.put("hostInfo", hostInfoMap);
         map.put("metadata", metadata);
         // Додаємо статус та тип результату до мапи.
         map.put("status", status);
         map.put("tip", tip);
-
         // Повертаємо готову мапу.
         return map;
     }

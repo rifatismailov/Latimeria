@@ -11,8 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -67,7 +66,7 @@ public class Reader implements Runnable {
             String text = documentReader.reader().toString();
             Map<String, Object> metadata = documentReader.getMetadataMap();
             String status = mainClassifier.classifyTexts(text).replaceAll(",", "");
-            processClassificationResult(status, text,metadata);
+            processClassificationResult(status, text, metadata);
             FileManager.deleteFile(file);  // Видаляємо файл після обробки
         } else {
             LOGGER.severe("Файл не знайдено або порожній: " + filePath);
@@ -83,11 +82,14 @@ public class Reader implements Runnable {
      * @param text   текст, що був класифікований.
      * @throws IOException у разі проблем із видаленням файлу з Minio.
      */
-    private void processClassificationResult(@NotNull String status, String text,Map<String, Object> metadata) throws IOException {
+    private void processClassificationResult(@NotNull String status, String text, Map<String, Object> metadata) throws IOException {
         if (status.contains("positive")) {
             String tip = tipClassifier.classifyTexts(text).toString().replaceAll(",", "");
-            LOGGER.info("ПОЗИТИВНИЙ " +hostInfo.toString());
-            elasticSender.sendData("latimeria", UUID.randomUUID().toString(), new Result(hostInfo, status, tip,metadata));
+            LOGGER.info("ПОЗИТИВНИЙ " + hostInfo.toString());
+
+            Map<String,Object> map=new AddInfo().loadConfig("KEY_PHRASES.json",text);
+
+            elasticSender.sendData("latimeria", UUID.randomUUID().toString(), new Result(hostInfo, status, tip, metadata, map));
         } else {
             LOGGER.info("НЕГАТИВНИЙ " + hostInfo.toString());
             minioManager.deleteFile(objectName);  // Видаляємо файл із Minio

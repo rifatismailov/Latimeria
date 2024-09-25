@@ -56,14 +56,14 @@ public class TextClassifier {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
             classifier = (Classifier) ois.readObject();
             // Логування успішного завантаження моделі
-            LOGGER.info("Модель успешно загружена из: " + file);
+            LOGGER.info("Модель умпішно завантажена з: " + file);
         } catch (FileNotFoundException e) {
             // Логування та виняток у випадку, якщо файл не знайдено
-            LOGGER.severe("Файл модели не найден: " + file);
+            LOGGER.severe("Файл моделі не знайдена: " + file);
             throw e;
         } catch (IOException | ClassNotFoundException e) {
             // Логування інших помилок при завантаженні
-            LOGGER.severe("Ошибка загрузки модели: " + e.getMessage());
+            LOGGER.severe("Помилка під час завантаження моделю: " + e.getMessage());
             throw e;
         }
     }

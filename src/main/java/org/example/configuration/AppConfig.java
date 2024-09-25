@@ -8,14 +8,17 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.example.manager.MinioManager;
 import org.example.nlp.ClassifierModel;
 import org.example.manager.ElasticSender;
+import org.example.reader.Reader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 @Configuration
 public class AppConfig {
+    private static final Logger LOGGER = Logger.getLogger(AppConfig.class.getName());
 
     @Value("${classifier.model}")
     private String classifier_model;
@@ -43,13 +46,13 @@ public class AppConfig {
 
     @Bean
     public ClassifierModel classifierModel() throws IOException, ClassNotFoundException {
-        System.out.println(classifier_model + " " + classifier_model_tip);
+        LOGGER.info(classifier_model + " " + classifier_model_tip);
         return new ClassifierModel(classifier_model, classifier_model_tip);
     }
 
     @Bean
     public MinioManager minioConnector() {
-        System.out.println(minioUrl + " " + minioAccessKey + " " + minioSecretKey);
+        LOGGER.info(minioUrl + " " + minioAccessKey + " " + minioSecretKey);
         MinioClient minioClient = MinioManager.minio("http://192.168.51.131:9001", "admin", "27Zeynalov");
         String bucketName = "example-bucket";
         MinioManager minioManager = new MinioManager(minioClient, bucketName);
@@ -60,10 +63,10 @@ public class AppConfig {
 
 
     public RestHighLevelClient client() {
-        System.out.println(elc_host + " " + elc_port + " " + elc_scheme);
+        LOGGER.info(elc_host + " " + elc_port + " " + elc_scheme);
         int port = Integer.parseInt(elc_port);
         RestClientBuilder builder = RestClient.builder(
-                new HttpHost(elc_host,port, elc_scheme));
+                new HttpHost(elc_host, port, elc_scheme));
         return new RestHighLevelClient(builder);
     }
 
