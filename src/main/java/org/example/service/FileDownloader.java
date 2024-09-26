@@ -1,4 +1,4 @@
-package org.example.manager;
+package org.example.service;
 
 import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
@@ -13,10 +13,11 @@ import java.util.logging.Logger;
 
 /**
  * Клас для керування HTTP-запитами, який дозволяє завантажувати файли за вказаною URL-адресою.
+ * Ре
  */
-public class HTTPManager {
+public class FileDownloader {
 
-    private static final Logger LOGGER = Logger.getLogger(HTTPManager.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FileDownloader.class.getName());
     String fileName = "";
 
     /**

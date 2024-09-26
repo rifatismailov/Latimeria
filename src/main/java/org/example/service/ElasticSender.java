@@ -1,12 +1,16 @@
-package org.example.manager;
+package org.example.service;
 
+import org.apache.commons.exec.ExecuteException;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.client.RequestOptions;
 import org.example.web.Result;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.action.index.IndexRequest;
+
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -52,7 +56,15 @@ public class ElasticSender {
             // Виконуємо запит до Elasticsearch і отримуємо відповідь.
             client.index(request, RequestOptions.DEFAULT);
 
+        } catch (ElasticsearchException e) {
+            LOGGER.severe("Помилка Elasticsearch перевірте зʼєднання: " + e.getMessage());
+        } catch (UnknownHostException e) {
+            LOGGER.severe("Не вдалося знайти хост перевірте правильність хоста: " + e.getMessage());
+        } catch (ExecuteException e) {
+            LOGGER.severe(e.getMessage());
         } catch (IOException e) {
+            //Так як ми поки не вміємо відпрацьовувати відповідь з сервера Elasticsearch що спричиняєть нам помилку
+            //Ми парсимо помилку та відоброжаємо відповідь сервера Elasticsearch
             LOGGER.severe("Інший тип помилки :" + e.getMessage());
             String regex = "requestLine=(.*?), host=(.*?), response=(.*?)}";
             Pattern pattern = Pattern.compile(regex);

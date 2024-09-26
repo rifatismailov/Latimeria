@@ -149,5 +149,4 @@ public class HostInfo {
         hostInfoMap.put("urlFile", getUrlFile());
         return hostInfoMap.toString();
     }
-
 }

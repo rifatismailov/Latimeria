@@ -108,7 +108,6 @@ public class TextClassifier {
             for (String text : texts) {
                 futures.add(executor.submit(() -> classifyText(text)));
             }
-
             // Отримання результатів після обробки
             for (Future<String> future : futures) {
                 try {

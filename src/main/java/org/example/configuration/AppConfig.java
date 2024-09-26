@@ -5,10 +5,9 @@ import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.example.manager.MinioManager;
+import org.example.service.MinioManager;
 import org.example.nlp.ClassifierModel;
-import org.example.manager.ElasticSender;
-import org.example.reader.Reader;
+import org.example.service.ElasticSender;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,6 +43,9 @@ public class AppConfig {
     @Value("${elc.scheme}")
     private String elc_scheme;
 
+    @Value("${key.phrases}")
+    private String key_phrases;
+
     @Bean
     public ClassifierModel classifierModel() throws IOException, ClassNotFoundException {
         LOGGER.info(classifier_model + " " + classifier_model_tip);
@@ -53,12 +55,18 @@ public class AppConfig {
     @Bean
     public MinioManager minioConnector() {
         LOGGER.info(minioUrl + " " + minioAccessKey + " " + minioSecretKey);
-        MinioClient minioClient = MinioManager.minio("http://192.168.51.131:9001", "admin", "27Zeynalov");
-        String bucketName = "example-bucket";
-        MinioManager minioManager = new MinioManager(minioClient, bucketName);
-        minioManager.checkCreateBucket();
-        minioManager.checkSaveDir("received_files/");
-        return minioManager;
+        try {
+            MinioClient minioClient = MinioManager.minio(minioUrl, minioAccessKey, minioSecretKey);
+            String bucketName = "example-bucket";
+            MinioManager minioManager = new MinioManager(minioClient, bucketName);
+            minioManager.checkCreateBucket();
+            minioManager.checkSaveDir("received_files/");
+            return minioManager;
+        } catch (Exception e) {
+            LOGGER.severe("Помилка " + e.getMessage());
+        }
+
+        return null;
     }
 
 
@@ -73,6 +81,11 @@ public class AppConfig {
     @Bean
     public ElasticSender elasticSender() {
         return new ElasticSender(client());
+    }
+
+    @Bean
+    String keyPhrases() {
+        return key_phrases;
     }
 }
 

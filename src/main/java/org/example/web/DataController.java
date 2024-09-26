@@ -1,9 +1,9 @@
 package org.example.web;
 
-import org.example.manager.MinioManager;
+import org.example.service.MinioManager;
 import org.example.nlp.ClassifierModel;
 import org.example.reader.Reader;
-import org.example.manager.ElasticSender;
+import org.example.service.ElasticSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +23,7 @@ public class DataController {
     private final ClassifierModel classifierModel;
     private final MinioManager minioManager;
     private final ElasticSender elasticSender; // Додаємо Sender
+    private String key_phrases;
 
     /**
      * Конструктор контролера для інжекції залежностей.
@@ -32,10 +33,11 @@ public class DataController {
      * @param elasticSender менеджер для відправки даних в Elasticsearch.
      */
     @Autowired
-    public DataController(ClassifierModel classifierModel, MinioManager minioManager, ElasticSender elasticSender) {
+    public DataController(ClassifierModel classifierModel, MinioManager minioManager, ElasticSender elasticSender,String key_phrases) {
         this.classifierModel = classifierModel;
         this.minioManager = minioManager;
         this.elasticSender = elasticSender; // Інжектуємо Sender
+        this.key_phrases = key_phrases;
     }
 
     /**
@@ -48,14 +50,14 @@ public class DataController {
      * @throws ClassNotFoundException у разі проблем із завантаженням класів.
      */
     @PostMapping("/HostInfo")
-    public ResponseEntity<String> receiveData(@RequestBody HostInfo hostInfo) throws IOException, InterruptedException, ClassNotFoundException {
+    public ResponseEntity<String> receiveData(@RequestBody HostInfo hostInfo){
         // Отримання URL для завантаження файлу
         String resignedUrl = minioManager.getPresignedUrl(hostInfo.getUrlFile());
         if (resignedUrl != null) {
             // Завантажуємо файл за отриманим URL
             String file = minioManager.downloadFile(resignedUrl);
             // Якщо файл існує і не порожній, починаємо обробку
-            Reader reader = new Reader(classifierModel, minioManager, hostInfo.getUrlFile(), hostInfo, file, elasticSender);
+            Reader reader = new Reader(classifierModel, minioManager, hostInfo.getUrlFile(), hostInfo, file, elasticSender,key_phrases);
             reader.startReading();
         }
         return new ResponseEntity<>("Дані успішно отримано!", HttpStatus.OK);

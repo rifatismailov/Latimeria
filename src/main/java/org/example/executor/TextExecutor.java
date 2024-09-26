@@ -14,7 +14,7 @@ public class TextExecutor {
      * Це гарантує, що не буде створено більше потоків, ніж потрібно або доступно для обробки текстів.
      **/
     @NotNull
-    public static ExecutorService executor(String[] texts) {
+    public static ExecutorService executor(@NotNull String[] texts) {
         int threadCount = Math.min(texts.length, Runtime.getRuntime().availableProcessors());
         return Executors.newFixedThreadPool(threadCount);
     }

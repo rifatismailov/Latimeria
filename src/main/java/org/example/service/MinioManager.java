@@ -1,4 +1,4 @@
-package org.example.manager;
+package org.example.service;
 
 import io.minio.*;
 import io.minio.errors.MinioException;
@@ -128,7 +128,7 @@ public record MinioManager(MinioClient minioClient, String bucketName) {
      */
     public String downloadFile(String fileURL) {
         // Повертаємо шлях до файлу після успішного завантаження
-        return new HTTPManager().download(fileURL, SAVE_DIR);
+        return new FileDownloader().download(fileURL, SAVE_DIR);
     }
 
 }

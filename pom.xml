@@ -69,7 +69,9 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
+            <version>3.3.0</version> <!-- Вкажіть тут версію -->
             <scope>runtime</scope>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>

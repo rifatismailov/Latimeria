@@ -1,10 +1,10 @@
 package org.example.reader;
 
-import org.example.manager.MinioManager;
+import org.example.service.MinioManager;
 import org.example.filemanagement.FileManager;
 import org.example.nlp.ClassifierModel;
 import org.example.nlp.TextClassifier;
-import org.example.manager.ElasticSender;
+import org.example.service.ElasticSender;
 import org.example.web.HostInfo;
 import org.example.web.Result;
 import org.jetbrains.annotations.NotNull;
@@ -19,9 +19,10 @@ import java.util.logging.Logger;
  * Він працює в окремому потоці, здійснює класифікацію текстів з використанням моделей,
  * та видаляє файли після обробки.
  */
-public class Reader implements Runnable {
-    private static final Logger LOGGER = Logger.getLogger(Reader.class.getName());
 
+public class Reader implements Runnable {
+
+    private static final Logger LOGGER = Logger.getLogger(Reader.class.getName());
     private final MinioManager minioManager;
     private final String objectName;        // Назва об'єкта (файлу) в Minio
     private final HostInfo hostInfo;        // Інформація про хост, на якому працює процес
@@ -29,6 +30,7 @@ public class Reader implements Runnable {
     private final TextClassifier mainClassifier;  // Основний класифікатор тексту
     private final TextClassifier tipClassifier;   // Додатковий класифікатор для "підказок"
     private final ElasticSender elasticSender; // Додаємо Sender
+    private final String key_phrases;
 
     /**
      * Конструктор класу Reader.
@@ -37,10 +39,19 @@ public class Reader implements Runnable {
      * @param objectName   назва об'єкта (файлу) в бакеті Minio.
      * @param hostInfo     інформація про хост.
      * @param filePath     шлях до локального файлу для читання.
+     * @param key_phrases
      * @throws IOException            у разі проблем з файлом або мережею.
      * @throws ClassNotFoundException у разі проблем із завантаженням класифікаторів.
      */
-    public Reader(@NotNull ClassifierModel classifierModel, MinioManager minioManager, String objectName, HostInfo hostInfo, String filePath, ElasticSender elasticSender) throws IOException, ClassNotFoundException {
+
+    public Reader(@NotNull
+                  ClassifierModel classifierModel,
+                  MinioManager minioManager,
+                  String objectName,
+                  HostInfo hostInfo,
+                  String filePath,
+                  ElasticSender elasticSender,
+                  String key_phrases) {
         this.minioManager = minioManager;
         this.objectName = objectName;
         this.hostInfo = hostInfo;
@@ -49,7 +60,9 @@ public class Reader implements Runnable {
         this.mainClassifier = classifierModel.getMainClassifier();
         this.tipClassifier = classifierModel.getTipClassifier();
         this.elasticSender = elasticSender; // Інжектуємо Sender
+        this.key_phrases = key_phrases;
     }
+
 
     /**
      * Метод для читання та обробки файлу.
@@ -82,12 +95,15 @@ public class Reader implements Runnable {
      * @param text   текст, що був класифікований.
      * @throws IOException у разі проблем із видаленням файлу з Minio.
      */
-    private void processClassificationResult(@NotNull String status, String text, Map<String, Object> metadata) throws IOException {
+    private void processClassificationResult(@NotNull
+                                             String status,
+                                             String text,
+                                             Map<String, Object> metadata) throws IOException {
         if (status.contains("positive")) {
             String tip = tipClassifier.classifyTexts(text).toString().replaceAll(",", "");
             LOGGER.info("ПОЗИТИВНИЙ " + hostInfo.toString());
 
-            Map<String,Object> map=new AddInfo().loadConfig("KEY_PHRASES.json",text);
+            Map<String, Object> map = new AddInfo().loadConfig(key_phrases, text);
 
             elasticSender.sendData("latimeria", UUID.randomUUID().toString(), new Result(hostInfo, status, tip, metadata, map));
         } else {
